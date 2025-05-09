@@ -8,11 +8,64 @@ service: laboratorio1
 provider:
   name: aws
   runtime: nodejs20.x
+  iamRoleStatements:
+    - Effect: Allow
+      Action: 
+        - dynamodb:*
+      Resource:
+        - arn:aws:dynamodb:${self:provider.region}:*:table/Proveedores
+
 
 functions:
   hello:
-    handler: handler.hello
+    handler: src/handler.hello
     events:
       - httpApi:
           path: /
           method: get
+  crearProveedor:
+    handler: src/crearProveedor.crearProveedor
+    events:
+      - httpApi:
+          path: /proveedores
+          method: post
+  obtenerProveedores:
+    handler: src/obtenerProveedores.obtenerProveedores
+    events:
+      - httpApi:
+          path: /proveedores
+          method: get
+  obtenerProveedor:
+    handler: src/obtenerProveedor.obtenerProveedor
+    events:
+      - httpApi:
+          path: /proveedores/{id}
+          method: get
+  eliminarProveedor:
+    handler: src/eliminarProveedor.eliminarProveedor
+    events:
+      - httpApi:
+          path: /proveedores/{id}
+          method: delete
+  actualizarProveedor:
+    handler: src/editarProveedor.editarProveedor
+    events:
+      - httpApi:
+          path: /proveedores/{id}
+          method: put
+
+
+#Esta tabla almacena la información de los proveedores que suministran los productos.
+resources:
+  Resources:
+    ProveedoresTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: Proveedores
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
